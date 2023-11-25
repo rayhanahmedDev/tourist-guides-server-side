@@ -32,6 +32,7 @@ async function run() {
 
     const packageCollection = client.db('TouristDB').collection('ourPackages')
     const userCollection = client.db('TouristDB').collection('user')
+    const guidesCollection = client.db('TouristDB').collection('tourGuides')
 
     // get the packages collection
     app.get('/packages', async(req, res) => {
