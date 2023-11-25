@@ -31,11 +31,19 @@ async function run() {
     await client.connect();
 
     const packageCollection = client.db('TouristDB').collection('ourPackages')
+    const userCollection = client.db('TouristDB').collection('user')
 
     // get the packages collection
     app.get('/packages', async(req, res) => {
         const result = await packageCollection.find().toArray()
         res.send(result)
+    })
+
+    // post the package collection in the wishlist
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user)
+      res.send(result)
     })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
