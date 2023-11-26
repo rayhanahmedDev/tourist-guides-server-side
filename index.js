@@ -34,6 +34,7 @@ async function run() {
     const userCollection = client.db('TouristDB').collection('user')
     const guidesCollection = client.db('TouristDB').collection('tourGuides')
     const tourTypeCollection = client.db('TouristDB').collection('tourType')
+    const stroyCollection = client.db('TouristDB').collection('touristStory')
 
     // get the packages collection
     app.get('/packages', async(req, res) => {
@@ -73,6 +74,12 @@ async function run() {
       const tourType = req.params.tourType;
       const tours = await tourTypeCollection.find().toArray()
       const result= await tours.filter( tour => tour.tourType === tourType)
+      res.send(result)
+    })
+
+    // story section, and get the story
+    app.get('/touristStory', async(req, res) => {
+      const result = await stroyCollection.find().toArray()
       res.send(result)
     })
     // Send a ping to confirm a successful connection
