@@ -82,6 +82,14 @@ async function run() {
       const result = await stroyCollection.find().toArray()
       res.send(result)
     })
+
+    // get the specific stroy
+    app.get('/touristStory/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await stroyCollection.findOne(query)
+      res.send(result)
+    })
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
