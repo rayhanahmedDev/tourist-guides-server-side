@@ -49,6 +49,12 @@ async function run() {
       res.send(result)
     })
 
+    // get the user data
+    app.get('/users', async(req, res) => {
+      const result = await userCollection.find().toArray()
+      res.send(result)
+    })
+
     // get the tour guides planner
     app.get('/guides', async(req, res) => {
       const result = await guidesCollection.find().toArray()
