@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -33,6 +33,7 @@ async function run() {
     const packageCollection = client.db('TouristDB').collection('ourPackages')
     const userCollection = client.db('TouristDB').collection('user')
     const guidesCollection = client.db('TouristDB').collection('tourGuides')
+    const tourTypeCollection = client.db('TouristDB').collection('tourType')
 
     // get the packages collection
     app.get('/packages', async(req, res) => {
@@ -50,6 +51,28 @@ async function run() {
     // get the tour guides planner
     app.get('/guides', async(req, res) => {
       const result = await guidesCollection.find().toArray()
+      res.send(result)
+    })
+
+    // get the specific guides
+    app.get('/guides/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await guidesCollection.findOne(query)
+      res.send(result)
+    })
+
+    // get the tour type data
+    app.get('/tourTypes', async(req, res) => {
+      const result = await tourTypeCollection.find().toArray()
+      res.send(result)
+    })
+
+    // get each tour type data
+    app.get('/tourTypes/:tourType', async(req,res) =>{
+      const tourType = req.params.tourType;
+      const tours = await tourTypeCollection.find().toArray()
+      const result= await tours.filter( tour => tour.tourType === tourType)
       res.send(result)
     })
     // Send a ping to confirm a successful connection
