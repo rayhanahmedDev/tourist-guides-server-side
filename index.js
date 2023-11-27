@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+var jwt = require('jsonwebtoken');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
@@ -36,6 +37,31 @@ async function run() {
     const tourTypeCollection = client.db('TouristDB').collection('tourType')
     const stroyCollection = client.db('TouristDB').collection('touristStory')
 
+    // jwt section
+    app.post('/jwt', async(req, res ) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET_TOKEN , {expiresIn: '365d'})
+      console.log(token);
+      res.send({token})
+    })
+
+    // verified token middleware
+    const verifyToken = (req, res, next) => {
+      console.log('verify token', req.headers.authorization);
+      if(!req.headers.authorization){
+        res.status(401).send({message : 'unauthorized access'})
+      }
+      const token = req.headers.authorization.split(' ')[1]
+      jwt.verify(token, process.env.SECRET_TOKEN, (err, decoded) => {
+        if(err){
+          return res.status(401).send({message : 'unauthorized access'})
+        }else{
+          req.decoded = decoded;
+          next()
+        }
+      })
+    }
+
     // get the packages collection
     app.get('/packages', async(req, res) => {
         const result = await packageCollection.find().toArray()
@@ -50,8 +76,25 @@ async function run() {
     })
 
     // get the user data
-    app.get('/users', async(req, res) => {
-      const result = await userCollection.find().toArray()
+    app.get('/users',verifyToken, async(req, res) => {
+      const email = req.query.email
+      const query = {email:email}
+      const result = await userCollection.find(query).toArray()
+      res.send(result)
+    })
+
+    // delete specific data
+    app.get('/users/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await userCollection.findOne(query)
+      res.send(result)
+    })
+    // delete specific data
+    app.delete('/users/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await userCollection.deleteOne(query)
       res.send(result)
     })
 
