@@ -154,12 +154,12 @@ async function run() {
     })
 
      // get specific data
-    //  app.get('/tourType/:id',async(req, res) => {
-    //   const id = req.params.id;
-    //   const query = {_id : new ObjectId(id)}
-    //   const result = await tourTypeCollection.findOne(query)
-    //   res.send(result)
-    // })
+     app.get('/tourType/:id',async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await tourTypeCollection.findOne(query)
+      res.send(result)
+    })
 
     // story section, and get the story
     app.get('/touristStory', async(req, res) => {
@@ -182,6 +182,23 @@ async function run() {
       const result = await bookedCollection.find(query).toArray()
       res.send(result)
     })
+
+    // bookings specific data
+    app.get('/bookings/:id',async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await bookedCollection.findOne(query)
+      res.send(result)
+    })
+
+    // delete specific data
+    app.delete('/bookings/:id',async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await bookedCollection.deleteOne(query)
+      res.send(result)
+    })
+    
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
