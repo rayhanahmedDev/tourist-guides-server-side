@@ -36,6 +36,8 @@ async function run() {
     const guidesCollection = client.db('TouristDB').collection('tourGuides')
     const tourTypeCollection = client.db('TouristDB').collection('tourType')
     const stroyCollection = client.db('TouristDB').collection('touristStory')
+    const signUpUserCollection = client.db('TouristDB').collection('signUpUser')
+    const bookedCollection = client.db('TouristDB').collection('bookings')
 
     // jwt section
     app.post('/jwt', async(req, res ) => {
@@ -62,10 +64,35 @@ async function run() {
       })
     }
 
+    // post by booking
+    app.post('/booking', async(req, res) => {
+      const body = req.body;
+      const result = await bookedCollection.insertOne(body)
+      res.send(result)
+    })
+    // post by sign up users
+    app.post('/signUpUser', async(req, res) => {
+      const user = req.body;
+      const query = {email : user.email}
+      const existingUser = await signUpUserCollection.findOne(query)
+      if(existingUser){
+        return res.send({message : 'user already exists', insertedId : null})
+      }
+      const result = await signUpUserCollection.insertOne(user)
+      res.send(result)
+    })
+
     // get the packages collection
     app.get('/packages', async(req, res) => {
         const result = await packageCollection.find().toArray()
         res.send(result)
+    })
+
+    // posted by user share story
+    app.post('/shareStory', async(req, res) => {
+      const shareStory = req.body;
+      const result = await stroyCollection.insertOne(shareStory)
+      res.send(result)
     })
 
     // post the package collection in the wishlist
@@ -126,6 +153,14 @@ async function run() {
       res.send(result)
     })
 
+     // get specific data
+    //  app.get('/tourType/:id',async(req, res) => {
+    //   const id = req.params.id;
+    //   const query = {_id : new ObjectId(id)}
+    //   const result = await tourTypeCollection.findOne(query)
+    //   res.send(result)
+    // })
+
     // story section, and get the story
     app.get('/touristStory', async(req, res) => {
       const result = await stroyCollection.find().toArray()
@@ -139,6 +174,15 @@ async function run() {
       const result = await stroyCollection.findOne(query)
       res.send(result)
     })
+
+    // get the my booking data
+    app.get('/bookings', async(req, res) => {
+      const email = req.query.email
+      const query = {email:email}
+      const result = await bookedCollection.find(query).toArray()
+      res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
