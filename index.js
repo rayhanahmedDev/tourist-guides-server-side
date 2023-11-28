@@ -93,6 +93,34 @@ async function run() {
     })
     // host section end
 
+    // admin section start
+    // verify admin
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email
+      const query = { email: email }
+      const user = await signUpUserCollection.findOne(query)
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      next()
+    }
+
+    app.get('/signUpUsers/admin/:email', verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+      }
+      const query = { email: email }
+      const user = await signUpUserCollection.findOne(query)
+      let admin = false;
+      if (user) {
+        admin = user?.role === 'admin';
+      }
+      res.send({ admin })
+    })
+    // admin section end
+
     // post by booking
     app.post('/booking', async (req, res) => {
       const body = req.body;
@@ -219,13 +247,26 @@ async function run() {
       res.send(result)
     })
 
-    // patch the host
+    // change the status of accepted by host
     app.patch('/booking/host/:id', verifyToken, verifyHost, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const updatedDoc = {
         $set: {
           status: 'Accepted'
+        }
+      }
+      const result = await bookedCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+
+    // change the status of rejected by host
+    app.patch('/bookings/host/:id', verifyToken, verifyHost, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          status: 'Rejected'
         }
       }
       const result = await bookedCollection.updateOne(query, updatedDoc)
