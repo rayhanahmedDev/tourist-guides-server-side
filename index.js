@@ -106,7 +106,7 @@ async function run() {
       next()
     }
 
-    app.get('/signUpUsers/admin/:email', verifyToken, async (req, res) => {
+    app.get('/signUpUser/admin/:email', verifyToken,verifyAdmin, async (req, res) => {
       const email = req.params.email;
       if (email !== req.decoded.email) {
         return res.status(403).send({ message: 'forbidden access' })
@@ -121,6 +121,11 @@ async function run() {
     })
     // admin section end
 
+    // get all sign up user
+    app.get('/allUsers',verifyToken,verifyAdmin, async(req, res) => {
+      const result = await signUpUserCollection.find().toArray()
+      res.send(result)
+    })
     // post by booking
     app.post('/booking', async (req, res) => {
       const body = req.body;
@@ -183,6 +188,12 @@ async function run() {
       res.send(result)
     })
 
+    // post by tour guide
+    app.post('/tourGuides',async(req, res) => {
+      const body = req.body;
+      const result = await guidesCollection.insertOne(body)
+      res.send(result)
+    })
     // get the tour guides planner
     app.get('/guides', async (req, res) => {
       const result = await guidesCollection.find().toArray()
@@ -273,6 +284,31 @@ async function run() {
       res.send(result)
     })
     
+    //  // change the role by admin
+    app.patch('/booked/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          role: 'admin'
+        }
+      }
+      const result = await signUpUserCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
+
+    // change the role by host
+    app.patch('/book/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          role: 'host'
+        }
+      }
+      const result = await signUpUserCollection.updateOne(query, updatedDoc)
+      res.send(result)
+    })
 
     // payment intent
     app.post('/create-payment-intent', async (req, res) => {
