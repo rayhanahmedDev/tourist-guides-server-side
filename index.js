@@ -151,6 +151,13 @@ async function run() {
       res.send(result)
     })
 
+    // post by the packages
+    app.post('/package',verifyToken,verifyAdmin, async(req, res) => {
+      const body = req.body;
+      const result = await packageCollection.insertOne(body)
+      res.send(result)
+    })
+
     // posted by user share story
     app.post('/shareStory', async (req, res) => {
       const shareStory = req.body;
