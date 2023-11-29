@@ -338,6 +338,39 @@ async function run() {
       res.send({ paymentsResult, deleteResult })
     })
 
+     // admin home
+     app.get('/admin-stats',verifyToken, verifyAdmin, async(req, res) => {
+      const users = await signUpUserCollection.estimatedDocumentCount()
+      const menuItems = await tourTypeCollection.estimatedDocumentCount()
+      const orders = await paymentCollection.estimatedDocumentCount()
+
+      // do not the best way
+      // const payments = await paymentCollection.find().toArray()
+      // const revenue = payments.reduce((total, item) => total + item.price,0)
+
+      // this the best way
+      const result = await paymentCollection.aggregate([
+        {
+          $group : {
+            _id : null,
+            totalRevenue : {
+              $sum : '$price'
+            }
+          }
+        }
+      ]).toArray()
+
+      const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+
+      res.send({
+        users,
+        menuItems,
+        orders,
+        revenue
+      })
+    })
+
+
     // bookings specific data
     app.get('/bookings/:id', async (req, res) => {
       const id = req.params.id;
